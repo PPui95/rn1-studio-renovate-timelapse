@@ -23,13 +23,48 @@
   };
 
   const CAMERA_MOVES = {
-    static: { label: 'นิ่ง (Static)', desc: 'a static, locked-off camera shot with no camera movement, letting the scene itself change within the frame' },
+    static: { label: 'นิ่ง (Static)', desc: 'the camera itself stays locked-off and does not move, but the scene remains fully alive with continuous motion happening inside the frame' },
     dolly: { label: 'เลื่อนเข้า (Dolly In)', desc: 'a slow, smooth dolly-in camera movement, gradually pushing toward the main subject' },
     pan: { label: 'แพนกล้อง (Pan)', desc: 'a smooth horizontal pan across the scene, gradually revealing more of the space' },
     orbit: { label: 'หมุนรอบ (Orbit)', desc: 'a slow orbiting arc shot circling around the subject or building' },
     crane: { label: 'เครนสำรวจ (Crane Reveal)', desc: 'a slow crane-up reveal shot, rising to show a wider view of the scene' },
     walk: { label: 'เดินสำรวจ (Walkthrough)', desc: 'a handheld walkthrough shot, moving forward as if walking through the space' },
   };
+
+  const CATEGORY_DETAIL = {
+    house: 'the exterior walls, roofline, windows, and front yard',
+    condo: 'the high-rise balcony, glass facade, and unit interior',
+    kitchen: 'the countertops, cabinetry, backsplash, and appliances',
+    bedroom: 'the bedding, wardrobe, flooring, and window light',
+    living: 'the sofa, coffee table, flooring, and wall finishes',
+    garden: 'the planting beds, pathway, and outdoor furniture',
+    pool: 'the poolside decking, water surface, and surrounding landscaping',
+    building: 'the multi-story facade, entrance, and surrounding street',
+    car: 'the vehicle body panels, wheels, and interior',
+    boat: 'the hull, deck, and rigging',
+    plane: 'the fuselage, wings, and cabin interior',
+    other: 'the space and its surrounding details',
+  };
+
+  const ACTIONS = {
+    renovate: {
+      start: 'dust motes drifting through a shaft of window light, loose debris and old curtains shifting gently in a draft, tree branches visible outside swaying in the wind',
+      mid: 'workers actively at work in the frame — a hand applying fresh paint in visible brush strokes, someone carrying materials across the room, a drill spinning with sawdust flying, plastic sheeting rippling in the air',
+      end: 'warm sunlight sweeping and shifting across the freshly finished surfaces, sheer curtains billowing softly, a person walking through and admiring the new space, steam gently rising from a cup on the counter',
+    },
+    timelapse: {
+      start: 'wind moving through tall grass and loose debris on the empty site, clouds drifting quickly overhead, dust briefly rising off the bare ground',
+      mid: 'construction workers actively moving across scaffolding, a crane swinging a beam into place, welding sparks flying, dust and debris settling as materials are lifted and placed',
+      end: 'people walking in and out of the finished structure, vehicles passing in the foreground, flags or landscaping swaying in the breeze, warm light sweeping across the facade',
+    },
+  };
+
+  function getAction(progress) {
+    const bucket = ACTIONS[state.mode];
+    if (progress === '0%') return bucket.start;
+    if (progress === '100%') return bucket.end;
+    return bucket.mid;
+  }
 
   const state = {
     mode: 'renovate',
@@ -223,15 +258,19 @@
     lines.push(`${stepNum}.2 ${hasFiles ? `มีภาพอ้างอิงที่อัปโหลดไว้แล้ว ${state.files.length} รูป — ใช้รูปเหล่านั้นแทนการสร้างภาพใหม่ได้เลย (ข้ามขั้นตอน "สร้างภาพ" ของคลิปที่มีรูปตรงกัน)` : 'ยังไม่มีภาพอ้างอิง — แต่ละคลิปด้านล่างจะมีขั้นตอน "สร้างภาพ" ให้ทำก่อน แล้วค่อยนำภาพนั้นไปสร้างวิดีโอ'}`);
     lines.push(`${stepNum}.3 ตั้งค่าโปรเจกต์ในใจ: โหมด = ${modeLabel}, หมวดงาน = ${catLabel()}, โทนภาพ = ${state.tone}, กล้อง = ${camera.label}`);
     if (state.idea.trim()) lines.push(`${stepNum}.4 ไอเดียเพิ่มเติมที่ต้องใส่ในทุกคลิป: "${state.idea.trim()}"`);
+    if (state.clips === 1) lines.push(`${stepNum}.5 ⚠️ หมายเหตุ: การเปลี่ยนสภาพจาก "ก่อน" ไป "หลัง" ทั้งหมดในคลิปเดียวเป็นเรื่องยากสำหรับ AI วิดีโอ — ถ้าผลลัพธ์ยังนิ่งหรือดูไม่สมจริง แนะนำให้เปลี่ยนไปใช้ 2-3 คลิปแทน (ปรับที่ปุ่ม "จำนวนคลิป" ด้านบน)`);
     lines.push('');
 
     stages.forEach((stage, i) => {
       const n = step();
       const hasMatchingFile = hasFiles && i < state.files.length;
 
-      const imagePrompt = `A high-resolution, photorealistic architectural photo of a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. Eye-level, straight-on composition, natural daylight, sharp focus, realistic materials and textures. ${faceInstruction.replace('in the shot', 'in the photo').replace('in at least some clips', 'in the photo')}. Professional real-estate photography, high detail, 4K quality, no text, no watermark.`;
+      const catDetail = CATEGORY_DETAIL[state.category] || CATEGORY_DETAIL.other;
+      const action = getAction(stage.progress);
 
-      const videoPrompt = `Animate this image with ${camera.desc}. The scene remains a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. ${faceInstruction}. Cinematic, photorealistic, architectural quality, natural lighting matching the mood of the scene. Audio: ${state.audio}. Duration: approximately 8 seconds.`;
+      const imagePrompt = `A high-resolution, photorealistic architectural photo of a ${catLabel()} — ${stage.desc}, focusing on ${catDetail}, styled with ${state.tone}. A candid moment captured mid-action: ${action}. Eye-level, straight-on composition, natural daylight, sharp focus, realistic materials and textures, shallow depth of field. ${faceInstruction.replace('in the shot', 'in the photo').replace('in at least some clips', 'in the photo')}. Professional real-estate photography, high detail, 4K quality, no text, no watermark.`;
+
+      const videoPrompt = `An 8-second video clip: ${camera.desc}. The scene shows a ${catLabel()} — ${stage.desc}, focusing on ${catDetail}, styled with ${state.tone}. Continuous, lively motion throughout the entire clip: ${action}. ${faceInstruction}. IMPORTANT: the shot must never look frozen or photo-like — keep something moving in frame at all times, from the first frame to the last. Cinematic, photorealistic, architectural quality, natural lighting matching the mood of the scene. Audio: ${state.audio}. Duration: approximately 8 seconds.`;
 
       lines.push(`## ขั้นตอนที่ ${n} — คลิปที่ ${i + 1}: ${stage.label} (${stage.progress})`);
 
