@@ -124,20 +124,22 @@
       </div>
 
       <button type="button" id="generateBtn" class="generate-btn">✨ สร้าง Workflow สำหรับ Flow →</button>
+      <button type="button" id="generateToolBtn" class="generate-btn generate-btn-alt">🛠️ สร้างเป็น Flow Custom Tool →</button>
+      <p class="field-hint tool-hint">"Custom Tool" คือ mini-app ที่ Flow สร้างให้อัตโนมัติจากคำอธิบาย แล้วใช้งานซ้ำได้ในตัว Flow เอง โดยไม่ต้องกลับมา copy prompt จากเว็บนี้ทุกครั้ง</p>
     </section>
   </div>
 
   <!-- OUTPUT -->
   <section class="panel output-panel" id="outputPanel" style="display:none;">
     <div class="output-head">
-      <h2 class="panel-title">📄 Workflow สำหรับ Google Flow</h2>
+      <h2 class="panel-title" id="outputTitle">📄 Workflow สำหรับ Google Flow</h2>
       <button type="button" id="copyBtn" class="copy-btn">📋 คัดลอก</button>
     </div>
     <textarea id="outputText" class="output-text" readonly></textarea>
     <div class="output-actions">
       <a id="openFlow" href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener" class="action-btn flow-btn">🎬 เปิด Google Flow</a>
     </div>
-    <p class="output-note">ทำตามขั้นตอนด้านบนทีละข้อ ตั้งแต่เตรียมภาพ → สร้างทีละคลิปใน Flow → ประกอบคลิปทั้งหมดใน Scenebuilder</p>
+    <p class="output-note" id="outputNote">ทำตามขั้นตอนด้านบนทีละข้อ ตั้งแต่เตรียมภาพ → สร้างทีละคลิปใน Flow → ประกอบคลิปทั้งหมดใน Scenebuilder</p>
   </section>
 
   <section class="feature-row">

@@ -301,9 +301,60 @@
     return lines.join('\n');
   }
 
+  function buildToolSpec() {
+    const modeLabel = state.mode === 'renovate' ? 'Renovate (ปรับปรุง/ตกแต่ง)' : 'Timelapse (ไทม์แลปส์ขั้นตอนก่อสร้าง)';
+
+    return `# FLOW CUSTOM TOOL SPEC — RN1 Renovate + Timelapse Builder
+
+วิธีใช้: เปิด Google Flow (https://labs.google/fx/tools/flow) → เข้าโปรเจกต์ใดก็ได้ → เมนูซ้าย "Tools" → "Create Tool" → วาง prompt ทั้งหมดด้านล่างนี้ลงในช่องคำสั่ง → ปล่อยให้ Flow สร้าง Custom Tool (มี UI + logic ในตัว) ให้อัตโนมัติ ใช้ซ้ำได้ทุกครั้งโดยไม่ต้องกลับมาที่เว็บนี้
+
+---
+
+Build a custom tool called "RN1 Renovate + Timelapse Builder" that generates a before/during/after transformation video of a space or object, entirely inside Flow.
+
+**Inputs the tool's UI should have:**
+- Mode: "Renovate" or "Timelapse" (default: ${modeLabel})
+- Category: บ้าน, คอนโด/ตึก, ครัว, ห้องนอน, ห้องนั่งเล่น, สวน/ลาน, สระว่ายน้ำ, รถ, เรือ, เครื่องบิน, อื่นๆ (default: ${catLabel()})
+- Number of clips: 1, 2, 3, or 4 (default: ${state.clips}) — 1 = ก่อน→หลัง, 2 = ก่อน-หลัง, 3 = ก่อน-กลาง-หลัง, 4 = แบ่งละเอียดขึ้น
+- Camera movement: Static, Dolly In, Pan, Orbit, Crane Reveal, or Walkthrough (default: ${CAMERA_MOVES[state.camera].label})
+- Visual tone: Warm Natural, Minimal White-Grey, Luxury Dark, Bright Modern Tropical, or custom free text (default: ${state.tone})
+- People visibility: No visible faces, Mixed, or Show faces (default: ${state.face})
+- Audio style: AI decides, Narration/voiceover, or Ambient on-site sound (default: ${state.audio})
+- Optional free-text "extra idea" box
+- Optional image upload per stage (before / mid / after) — if provided for a stage, skip step 1 below for that stage
+
+**What the tool should do when the user clicks Generate, for each stage (labeled by clip count, evenly spaced from 0% to 100%):**
+1. If no reference image was uploaded for that stage, first generate a still photorealistic image (image generation call) using a prompt built from: category, the stage's condition (0%=not started, mid=work in progress, 100%=finished), the chosen visual tone, and a stage-appropriate candid action from the action library below — never a generic static description.
+2. Then generate an 8-second video from that image (image-to-video / Ingredients-to-Video), with a prompt describing: the chosen camera movement, continuous motion happening throughout the whole clip (same action library), the chosen audio style, and an explicit instruction that the clip must never look frozen or photo-like — something must be visibly moving in every frame.
+3. Show each generated clip to the user as it completes, labeled with its stage name and % progress.
+After all stage clips are generated, concatenate them in stage order into one continuous output video and let the user download it.
+
+**Action library (pick by mode + stage progress):**
+- Renovate / 0%: dust motes drifting in a shaft of window light, old curtains and loose debris shifting in a draft, tree branches swaying outside
+- Renovate / mid: workers actively painting with visible brush strokes, someone carrying materials across the room, a drill spinning with sawdust flying, plastic sheeting rippling
+- Renovate / 100%: warm sunlight sweeping across freshly finished surfaces, sheer curtains billowing, a person walking through admiring the space
+- Timelapse / 0%: wind moving through tall grass and site debris, clouds drifting quickly overhead, dust briefly rising off bare ground
+- Timelapse / mid: workers actively moving across scaffolding, a crane swinging a beam into place, welding sparks flying, dust settling as materials are placed
+- Timelapse / 100%: people walking in and out of the finished structure, vehicles passing in the foreground, flags or landscaping swaying, warm light sweeping the facade
+
+**Style requirements for every generated image and video:** photorealistic, professional architectural/real-estate photography quality, natural lighting matching the chosen tone, no text or watermark overlays, faces handled per the "People visibility" setting, category focal detail (e.g. exterior walls/roofline for a house, countertops/cabinetry for a kitchen) kept sharp and in focus.`;
+  }
+
   document.getElementById('generateBtn').addEventListener('click', () => {
     const output = buildPrompt();
     document.getElementById('outputText').value = output;
+    document.getElementById('outputTitle').textContent = '📄 Workflow สำหรับ Google Flow';
+    document.getElementById('outputNote').textContent = 'ทำตามขั้นตอนด้านบนทีละข้อ ตั้งแต่เตรียมภาพ → สร้างทีละคลิปใน Flow → ประกอบคลิปทั้งหมดใน Scenebuilder';
+    const panel = document.getElementById('outputPanel');
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  document.getElementById('generateToolBtn').addEventListener('click', () => {
+    const output = buildToolSpec();
+    document.getElementById('outputText').value = output;
+    document.getElementById('outputTitle').textContent = '🛠️ Spec สำหรับสร้าง Flow Custom Tool';
+    document.getElementById('outputNote').textContent = 'คัดลอกทั้งหมด แล้ววางในช่อง "Create Tool" ของ Google Flow — Flow จะสร้างเครื่องมือ (UI + logic) ให้อัตโนมัติ ใช้ซ้ำได้ในตัว Flow เอง';
     const panel = document.getElementById('outputPanel');
     panel.style.display = 'block';
     panel.scrollIntoView({ behavior: 'smooth', block: 'start' });

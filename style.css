@@ -273,6 +273,17 @@ textarea:focus, .text-input:focus, .select-input:focus { outline: none; border-c
 .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(245, 148, 31, 0.35); }
 .generate-btn:active { transform: translateY(0); }
 
+.generate-btn-alt {
+  margin-top: 10px;
+  background: var(--bg-panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.generate-btn-alt:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: none; }
+
+.tool-hint { margin: 10px 0 0; text-align: center; }
+
 /* Output */
 .output-panel { margin-top: 20px; }
 .output-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
