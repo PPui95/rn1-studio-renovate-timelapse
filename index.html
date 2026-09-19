@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RN1 Studio — GPT Renovate + Timelapse Master Prompt Builder</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-icon">🏠</span>
+      <div class="brand-text">
+        <strong>RN1 STUDIO</strong>
+        <small>TURN IDEAS INTO SPACES</small>
+      </div>
+    </div>
+    <nav class="topnav">
+      <a href="#renovate" class="nav-btn" data-mode="renovate">🎨 Renovate</a>
+      <a href="#timelapse" class="nav-btn" data-mode="timelapse">🎬 Timelapse</a>
+      <a href="#builder" class="nav-btn active">📄 Master Prompt</a>
+    </nav>
+    <div class="topnav-right">
+      <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="pill-btn">ChatGPT</a>
+      <a href="https://gemini.google.com/" target="_blank" rel="noopener" class="pill-btn pill-btn-alt">✨ Gemini</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <h1>GPT <span class="accent">Renovate</span> + <span class="accent">Timelapse</span></h1>
+    <p class="hero-sub">สร้าง Master Prompt สำหรับ ChatGPT หรือ Gemini ได้ในเว็บเดียว</p>
+    <p class="hero-sub2">Renovate • ก่อสร้าง • TimeLapse ครบในระบบเดียว</p>
+  </div>
+</section>
+
+<main id="builder" class="builder">
+
+  <div class="steps-bar">
+    <div class="step" data-step="1"><span class="step-num">1</span> เลือกหมวดงาน</div>
+    <div class="step" data-step="2"><span class="step-num">2</span> ปรับสไตล์ + ตั้งค่า</div>
+    <div class="step" data-step="3"><span class="step-num">3</span> ได้ Master Prompt พร้อมใช้</div>
+  </div>
+
+  <div class="builder-grid">
+
+    <!-- LEFT: mode + categories -->
+    <section class="panel">
+      <h2 class="panel-title">เลือกหมวดงาน</h2>
+
+      <div class="mode-toggle" role="tablist">
+        <button type="button" class="mode-btn active" data-mode="renovate">🎨 Renovate (ตกแต่ง/ปรับปรุง)</button>
+        <button type="button" class="mode-btn" data-mode="timelapse">🎬 Timelapse (ไทม์แลปส์สร้าง)</button>
+      </div>
+
+      <div class="category-grid" id="categoryGrid"></div>
+
+      <label class="field-label" for="ideaText">✍️ เขียนไอเดียของคุณเอง (ถ้ามี)</label>
+      <textarea id="ideaText" rows="3" placeholder="เช่น อยากได้บ้านสไตล์ Modern Tropical มีสระว่ายน้ำเล็กหลังบ้าน..."></textarea>
+
+      <label class="field-label" for="refUpload">📷 อัปโหลดรูปที่ชอบ (ไม่บังคับ)</label>
+      <div class="upload-box" id="uploadBox">
+        <input type="file" id="refUpload" accept="image/*" multiple hidden>
+        <span id="uploadHint">ลากรูปมาวาง หรือคลิกเพื่อเลือกไฟล์ — ถ้าไม่มีรูป ระบบคิดไอเดียให้เอง</span>
+        <div class="upload-preview" id="uploadPreview"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: settings -->
+    <section class="panel">
+      <h2 class="panel-title">⚙️ ตั้งค่าการสร้าง</h2>
+
+      <label class="field-label">จำนวนช็อต</label>
+      <div class="chip-row" id="shotsRow">
+        <button type="button" class="chip" data-shots="6">6</button>
+        <button type="button" class="chip active" data-shots="8">8</button>
+        <button type="button" class="chip" data-shots="10">10</button>
+        <button type="button" class="chip" data-shots="12">12</button>
+        <button type="button" class="chip" data-shots="15">15</button>
+      </div>
+
+      <label class="field-label" for="toneSelect">โทนภาพ</label>
+      <select id="toneSelect" class="select-input">
+        <option value="โทนอบอุ่นธรรมชาติ (Warm Natural)">อบอุ่นธรรมชาติ</option>
+        <option value="โทนมินิมอลขาว-เทา (Minimal White-Grey)">มินิมอลขาว-เทา</option>
+        <option value="โทนหรูสไตล์ลักชัวรี (Luxury Dark)">หรูสไตล์ลักชัวรี</option>
+        <option value="โทนสดใสโมเดิร์นทรอปิคอล (Bright Modern Tropical)">สดใสโมเดิร์นทรอปิคอล</option>
+        <option value="กำหนดเอง">กำหนดเอง (พิมพ์ด้านล่าง)</option>
+      </select>
+      <input type="text" id="toneCustom" class="text-input" placeholder="พิมพ์โทนภาพที่ต้องการเอง..." style="display:none;margin-top:8px;">
+      <div class="swatch-row" id="swatchRow">
+        <span class="swatch" style="background:#b98457" data-color="โทนสีดินอบอุ่น (terracotta warm tone)"></span>
+        <span class="swatch" style="background:#e9e4da" data-color="โทนสีขาวครีมมินิมอล (off-white minimal tone)"></span>
+        <span class="swatch" style="background:#2e3a52" data-color="โทนสีน้ำเงินเข้มหรูหรา (deep navy luxury tone)"></span>
+        <span class="swatch active" style="background:#f5941f" data-color="โทนสีส้มอบอุ่นทันสมัย (warm modern orange accent)"></span>
+      </div>
+
+      <label class="field-label">การเห็นหน้าคน</label>
+      <div class="chip-row" id="faceRow">
+        <button type="button" class="chip active" data-face="ไม่เห็นหน้า">🚫 ไม่เห็นหน้า</button>
+        <button type="button" class="chip" data-face="ลูกผสม">🌓 ลูกผสม</button>
+        <button type="button" class="chip" data-face="เห็นหน้าคน">🙂 เห็นหน้าคน</button>
+      </div>
+
+      <label class="field-label">เสียงประกอบ (สำหรับวิดีโอ/ไทม์แลปส์)</label>
+      <div class="chip-row" id="audioRow">
+        <button type="button" class="chip active" data-audio="ให้ AI เลือกเสียงที่เหมาะสมเอง">🎚️ ให้ AI เลือก</button>
+        <button type="button" class="chip" data-audio="เสียงพากย์บรรยายขั้นตอนงาน">🎙️ เสียงพากย์งาน</button>
+        <button type="button" class="chip" data-audio="เสียงบรรยากาศหน้างาน/โรงงานจริง">🏗️ เสียงหน้างาน</button>
+      </div>
+
+      <button type="button" id="generateBtn" class="generate-btn">✨ สร้าง Master Prompt →</button>
+    </section>
+  </div>
+
+  <!-- OUTPUT -->
+  <section class="panel output-panel" id="outputPanel" style="display:none;">
+    <div class="output-head">
+      <h2 class="panel-title">📄 คำสั่งสำหรับ AI ของคุณ</h2>
+      <button type="button" id="copyBtn" class="copy-btn">📋 คัดลอก</button>
+    </div>
+    <textarea id="outputText" class="output-text" readonly></textarea>
+    <div class="output-actions">
+      <a id="openChatGPT" href="https://chatgpt.com/" target="_blank" rel="noopener" class="action-btn gpt-btn">💬 ใช้กับ ChatGPT</a>
+      <a id="openGemini" href="https://gemini.google.com/" target="_blank" rel="noopener" class="action-btn gemini-btn">✨ ใช้กับ Gemini</a>
+    </div>
+    <p class="output-note">คัดลอกข้อความนี้ไปวางในแชท แล้วแนบรูปอ้างอิงของคุณ (ถ้ามี) เพื่อให้ AI เริ่มสร้างภาพ/ไอเดียให้ทันที</p>
+  </section>
+
+  <section class="feature-row">
+    <div class="feature-item">🖼️ <span>มีภาพตัวอย่าง<br>เริ่ม &gt; กลาง &gt; เสร็จ</span></div>
+    <div class="feature-item">✏️ <span>เขียนไอเดียตัวเอง<br>เพิ่มได้</span></div>
+    <div class="feature-item">📤 <span>อัปโหลดรูปที่ชอบได้<br>ใช้เป็นต้นแบบ</span></div>
+    <div class="feature-item">💡 <span>ต่อยอดงานได้ไม่ซ้ำใคร<br>ไอเดียใหม่ที่เป็นของคุณ</span></div>
+  </section>
+
+  <section class="example-section">
+    <h2 class="panel-title center">ตัวอย่างงาน Renovate + Timelapse</h2>
+    <div class="example-row">
+      <div class="example-card">
+        <div class="example-img"><img src="assets/example-before.jpg" alt="บ้านก่อนปรับปรุง" loading="lazy"></div>
+        <p>เริ่มต้น<br><strong>0%</strong></p>
+      </div>
+      <div class="example-arrow">»</div>
+      <div class="example-card">
+        <div class="example-img"><img src="assets/example-mid.jpg" alt="บ้านระหว่างก่อสร้าง/ปรับปรุง" loading="lazy"></div>
+        <p>กลางทาง<br><strong>50%</strong></p>
+      </div>
+      <div class="example-arrow">»</div>
+      <div class="example-card">
+        <div class="example-img"><img src="assets/example-after.jpg" alt="บ้านหลังปรับปรุงเสร็จสมบูรณ์" loading="lazy"></div>
+        <p>เสร็จสมบูรณ์<br><strong class="accent">100%</strong></p>
+      </div>
+    </div>
+    <p class="example-quote">"เปลี่ยนไอเดีย ให้เป็นภาพที่เห็นได้จริง ด้วยพลังของ AI"</p>
+    <p class="example-credit">ภาพตัวอย่างประกอบจาก Wikimedia Commons (CC BY-SA) — Chris Light, John Baker, Andre Carrotflower</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <p>เห็นภาพ workflow ชัด เข้าใจง่าย ใช้งานไว &nbsp;·&nbsp; สร้างบ้าน &nbsp;·&nbsp; ตกแต่งภายใน &nbsp;·&nbsp; ก่อสร้าง &nbsp;·&nbsp; ทุกโปรเจกต์ที่คุณจินตนาการ</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
