@@ -208,35 +208,47 @@
 
     const stages = getStages();
     const hasFiles = state.files.length > 0;
+    let stepNum = 0;
+    const step = () => (++stepNum);
 
-    const header = `# RN1 FLOW PROMPT — ${modeLabel}
-หมวดงาน: ${catLabel()} | จำนวนคลิป: ${stages.length} | กล้อง: ${camera.label} | โทนภาพ: ${state.tone}
+    const lines = [];
+    lines.push(`# WORKFLOW: RN1 Flow ${modeLabel} — ${catLabel()}`);
+    lines.push(`หมวดงาน: ${catLabel()} | จำนวนคลิป: ${stages.length} | กล้อง: ${camera.label} | โทนภาพ: ${state.tone}`);
+    lines.push('');
 
-**วิธีใช้ใน Google Flow:** เปิด https://labs.google/fx/tools/flow → เลือกโหมด "Ingredients to Video" → อัปโหลดภาพอ้างอิงของคลิปนั้น (ถ้ามี) → วาง Prompt ของคลิปนั้นในช่องคำสั่ง → กด Generate (ได้คลิปยาวประมาณ 8 วินาที/ครั้ง) → ทำซ้ำทีละคลิปตามลำดับด้านล่าง แล้วนำคลิปทั้งหมดไปต่อกันใน Scenebuilder
+    lines.push(`## ขั้นตอนที่ ${step()} — เตรียมตัวก่อนเริ่ม`);
+    lines.push(`${stepNum}.1 เปิด Google Flow ที่ https://labs.google/fx/tools/flow`);
+    lines.push(`${stepNum}.2 ${hasFiles ? `เตรียมภาพอ้างอิงที่อัปโหลดไว้ ${state.files.length} รูป ให้พร้อมสำหรับแต่ละคลิป` : 'ไม่มีภาพอ้างอิง — ข้ามขั้นนี้ได้ Flow จะสร้างฉากจาก prompt ข้อความล้วน (text-to-video)'}`);
+    lines.push(`${stepNum}.3 ตั้งค่าโปรเจกต์ในใจ: โหมด = ${modeLabel}, หมวดงาน = ${catLabel()}, โทนภาพ = ${state.tone}, กล้อง = ${camera.label}`);
+    if (state.idea.trim()) lines.push(`${stepNum}.4 ไอเดียเพิ่มเติมที่ต้องใส่ในทุกคลิป: "${state.idea.trim()}"`);
+    lines.push('');
 
-${hasFiles ? `มีภาพอ้างอิงแนบมาด้วย ${state.files.length} รูป ให้ใช้เป็น Ingredients ของแต่ละคลิปตามลำดับ` : 'ไม่มีภาพอ้างอิงแนบมา ให้ Flow สร้างฉากขึ้นเองตาม Prompt ข้อความล้วน (text-to-video)'}
-${state.idea.trim() ? `ไอเดียเพิ่มเติมจากผู้ใช้: "${state.idea.trim()}"` : ''}
-`;
-
-    const clipBlocks = stages.map((stage, i) => {
-      const refNote = hasFiles
-        ? `ภาพอ้างอิงที่ใช้: รูปที่ ${Math.min(i + 1, state.files.length)} ที่อัปโหลดไว้ (หรือรูปที่ใกล้เคียงสถานะ "${stage.label}" ที่สุด)`
-        : `ภาพอ้างอิง: ไม่มี — ให้ Flow สร้างฉากจาก Prompt ข้อความล้วนด้านล่าง`;
+    stages.forEach((stage, i) => {
+      const n = step();
+      const refLine = hasFiles
+        ? `${n}.2 อัปโหลดภาพอ้างอิง: รูปที่ ${Math.min(i + 1, state.files.length)} ที่เตรียมไว้ (หรือรูปที่ตรงกับสถานะ "${stage.label}" ที่สุด) ลงในโหมด "Ingredients to Video"`
+        : `${n}.2 ข้ามการอัปโหลดภาพ — ปล่อยให้ Flow สร้างฉากจาก prompt ข้อความล้วนด้านล่าง`;
 
       const flowPrompt = `${camera.desc}. The scene shows a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. ${faceInstruction}. Cinematic, photorealistic, architectural quality, natural lighting matching the mood of the scene. Audio: ${state.audio}. Duration: approximately 8 seconds.`;
 
-      return `## คลิปที่ ${i + 1} — ${stage.label} (${stage.progress})
-${refNote}
+      lines.push(`## ขั้นตอนที่ ${n} — สร้างคลิปที่ ${i + 1}: ${stage.label} (${stage.progress})`);
+      lines.push(`${n}.1 ใน Flow เลือกโหมด "Ingredients to Video"`);
+      lines.push(refLine);
+      lines.push(`${n}.3 วาง Prompt นี้ลงในช่องคำสั่ง:`);
+      lines.push(`   "${flowPrompt}"`);
+      lines.push(`${n}.4 กด Generate แล้วรอผลลัพธ์ (คลิปยาวประมาณ 8 วินาที)`);
+      lines.push(`${n}.5 ถ้าผลลัพธ์ยังไม่ตรง ปรับถ้อยคำใน prompt แล้ว Generate ซ้ำ ก่อนไปคลิปถัดไป`);
+      lines.push('');
+    });
 
-**Prompt (วางในช่อง Flow):**
-${flowPrompt}`;
-    }).join('\n\n');
+    const lastStep = step();
+    lines.push(`## ขั้นตอนที่ ${lastStep} — ประกอบคลิปทั้งหมดเป็นวิดีโอเดียว`);
+    lines.push(`${lastStep}.1 เปิด Scenebuilder ใน Flow`);
+    lines.push(`${lastStep}.2 ลากคลิปทั้ง ${stages.length} คลิปมาเรียงตามลำดับ: ${stages.map(s => s.label).join(' → ')}`);
+    lines.push(`${lastStep}.3 ตรวจสอบความต่อเนื่องของโทนภาพและเสียงระหว่างคลิป ปรับตัดต่อ/ครอปตามต้องการ`);
+    lines.push(`${lastStep}.4 กด Export เพื่อได้วิดีโอ ${modeLabel} ฉบับสมบูรณ์`);
 
-    return `${header}
-${clipBlocks}
-
-## หลังจากได้ครบทุกคลิป
-นำคลิปทั้งหมดไปเรียงต่อกันใน Flow Scenebuilder ตามลำดับ ${stages.map(s => s.label).join(' → ')} เพื่อให้ได้วิดีโอ ${modeLabel} ฉบับสมบูรณ์`;
+    return lines.join('\n');
   }
 
   document.getElementById('generateBtn').addEventListener('click', () => {
