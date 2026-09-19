@@ -197,6 +197,12 @@ a { color: inherit; text-decoration: none; }
   color: var(--text-dim);
   margin: 16px 0 8px;
 }
+.field-hint {
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
 textarea, .text-input, .select-input {
   width: 100%;
   background: var(--bg-panel-2);
@@ -307,10 +313,8 @@ textarea:focus, .text-input:focus, .select-input:focus { outline: none; border-c
   font-weight: 700;
   font-size: 14px;
 }
-.gpt-btn { background: #10a37f; color: #fff; }
-.gpt-btn:hover { background: #0d8c6d; }
-.gemini-btn { background: linear-gradient(135deg, #4285f4, #9b72cb); color: #fff; }
-.gemini-btn:hover { opacity: 0.9; }
+.flow-btn { background: linear-gradient(135deg, #4285f4, #9b72cb); color: #fff; }
+.flow-btn:hover { opacity: 0.9; }
 
 .output-note { font-size: 12px; color: var(--text-dim); margin-top: 12px; text-align: center; }
 

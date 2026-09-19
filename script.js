@@ -22,13 +22,23 @@
     ],
   };
 
+  const CAMERA_MOVES = {
+    static: { label: 'นิ่ง (Static)', desc: 'a static, locked-off camera shot with no camera movement, letting the scene itself change within the frame' },
+    dolly: { label: 'เลื่อนเข้า (Dolly In)', desc: 'a slow, smooth dolly-in camera movement, gradually pushing toward the main subject' },
+    pan: { label: 'แพนกล้อง (Pan)', desc: 'a smooth horizontal pan across the scene, gradually revealing more of the space' },
+    orbit: { label: 'หมุนรอบ (Orbit)', desc: 'a slow orbiting arc shot circling around the subject or building' },
+    crane: { label: 'เครนสำรวจ (Crane Reveal)', desc: 'a slow crane-up reveal shot, rising to show a wider view of the scene' },
+    walk: { label: 'เดินสำรวจ (Walkthrough)', desc: 'a handheld walkthrough shot, moving forward as if walking through the space' },
+  };
+
   const state = {
     mode: 'renovate',
     category: 'house',
-    shots: 8,
+    clips: 2,
     tone: document.getElementById('toneSelect').value,
     face: 'ไม่เห็นหน้า',
-    audio: 'ให้ AI เลือกเสียงที่เหมาะสมเอง',
+    camera: 'static',
+    audio: 'ให้ AI เลือกเสียงที่เหมาะสมกับฉากเอง',
     idea: '',
     files: [],
   };
@@ -78,11 +88,18 @@
     });
   });
 
-  document.getElementById('shotsRow').addEventListener('click', (e) => {
+  document.getElementById('clipsRow').addEventListener('click', (e) => {
     const btn = e.target.closest('.chip');
     if (!btn) return;
-    state.shots = Number(btn.dataset.shots);
-    document.querySelectorAll('#shotsRow .chip').forEach(b => b.classList.toggle('active', b === btn));
+    state.clips = Number(btn.dataset.clips);
+    document.querySelectorAll('#clipsRow .chip').forEach(b => b.classList.toggle('active', b === btn));
+  });
+
+  document.getElementById('cameraRow').addEventListener('click', (e) => {
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    state.camera = btn.dataset.camera;
+    document.querySelectorAll('#cameraRow .chip').forEach(b => b.classList.toggle('active', b === btn));
   });
 
   document.getElementById('faceRow').addEventListener('click', (e) => {
@@ -134,7 +151,7 @@
   refUpload.addEventListener('change', () => handleFiles(refUpload.files));
 
   function handleFiles(fileList) {
-    state.files = Array.from(fileList).slice(0, 6);
+    state.files = Array.from(fileList).slice(0, 4);
     uploadPreview.innerHTML = '';
     if (state.files.length === 0) {
       uploadHint.style.display = 'block';
@@ -154,55 +171,72 @@
     return found ? found.label : 'งานทั่วไป';
   }
 
+  function getStages() {
+    const modeWord = state.mode === 'renovate' ? 'ปรับปรุง' : 'ก่อสร้าง';
+    if (state.clips === 1) {
+      return [{ label: `ก่อน → หลัง${modeWord}`, progress: '0% → 100%', desc: 'the full transformation compressed into one continuous clip' }];
+    }
+    if (state.clips === 2) {
+      return [
+        { label: `ก่อน${modeWord}`, progress: '0%', desc: 'the starting condition, before any work has begun' },
+        { label: `หลัง${modeWord}เสร็จ`, progress: '100%', desc: 'the fully finished result' },
+      ];
+    }
+    if (state.clips === 3) {
+      return [
+        { label: `ก่อน${modeWord}`, progress: '0%', desc: 'the starting condition, before any work has begun' },
+        { label: 'ระหว่างดำเนินการ', progress: '50%', desc: 'work actively in progress, midway through the transformation' },
+        { label: `หลัง${modeWord}เสร็จ`, progress: '100%', desc: 'the fully finished result' },
+      ];
+    }
+    return [
+      { label: `ก่อน${modeWord}`, progress: '0%', desc: 'the starting condition, before any work has begun' },
+      { label: 'ช่วงต้นของงาน', progress: '35%', desc: 'early-stage work just getting underway' },
+      { label: 'ช่วงใกล้เสร็จ', progress: '70%', desc: 'work nearly complete, finishing touches underway' },
+      { label: `หลัง${modeWord}เสร็จ`, progress: '100%', desc: 'the fully finished result' },
+    ];
+  }
+
   function buildPrompt() {
     const modeLabel = state.mode === 'renovate' ? 'Renovate (ปรับปรุง/ตกแต่ง)' : 'Timelapse (ไทม์แลปส์ขั้นตอนก่อสร้าง)';
-    const sequenceLabel = state.mode === 'renovate'
-      ? 'ก่อนปรับปรุง → ระหว่างปรับปรุง → หลังปรับปรุงเสร็จสมบูรณ์'
-      : 'เริ่มต้น (โครงสร้าง 0%) → ระหว่างก่อสร้าง (50%) → เสร็จสมบูรณ์ (100%)';
+    const camera = CAMERA_MOVES[state.camera];
     const faceInstruction = {
-      'ไม่เห็นหน้า': 'ห้ามมีใบหน้าคนปรากฏชัดเจนในภาพทุกช็อต ถ้ามีคนให้เห็นแค่ด้านหลังหรือมุมที่บังใบหน้า',
-      'ลูกผสม': 'ให้มีทั้งช็อตที่ไม่เห็นหน้าคนและช็อตที่เห็นหน้าคนผสมกัน เพื่อความเป็นธรรมชาติ',
-      'เห็นหน้าคน': 'ให้มีคนและเห็นใบหน้าชัดเจนในบางช็อตเพื่อสื่อถึงการใช้งานจริงของพื้นที่',
+      'ไม่เห็นหน้า': 'no clearly visible human faces in the shot; if a person appears, keep them turned away or out of clear focus',
+      'ลูกผสม': 'a natural mix — some clips may show people clearly, others may not',
+      'เห็นหน้าคน': 'include people with clearly visible faces in at least some clips, to show the space being used',
     }[state.face];
 
-    const refNote = state.files.length > 0
-      ? `มีภาพอ้างอิงแนบมาด้วย ${state.files.length} รูป ให้วิเคราะห์สภาพ/สไตล์/วัสดุจากภาพก่อน แล้วใช้เป็นจุดตั้งต้นของงาน`
-      : 'ไม่มีภาพอ้างอิงแนบมา ให้ AI คิดไอเดียที่เหมาะสมกับหมวดงานนี้ขึ้นมาเอง';
+    const stages = getStages();
+    const hasFiles = state.files.length > 0;
 
-    const ideaNote = state.idea.trim()
-      ? `ไอเดียเพิ่มเติมจากผู้ใช้: "${state.idea.trim()}"`
-      : 'ไม่มีไอเดียเพิ่มเติม ให้ AI ออกแบบอย่างสร้างสรรค์ตามความเหมาะสม';
+    const header = `# RN1 FLOW PROMPT — ${modeLabel}
+หมวดงาน: ${catLabel()} | จำนวนคลิป: ${stages.length} | กล้อง: ${camera.label} | โทนภาพ: ${state.tone}
 
-    return `# RN1 MASTER PROMPT — ${modeLabel}
-หมวดงาน: ${catLabel()} | จำนวนช็อต: ${state.shots} ภาพ | โทนภาพ: ${state.tone}
+**วิธีใช้ใน Google Flow:** เปิด https://labs.google/fx/tools/flow → เลือกโหมด "Ingredients to Video" → อัปโหลดภาพอ้างอิงของคลิปนั้น (ถ้ามี) → วาง Prompt ของคลิปนั้นในช่องคำสั่ง → กด Generate (ได้คลิปยาวประมาณ 8 วินาที/ครั้ง) → ทำซ้ำทีละคลิปตามลำดับด้านล่าง แล้วนำคลิปทั้งหมดไปต่อกันใน Scenebuilder
 
-**วางคำสั่งนี้ในแชท ChatGPT หรือ Gemini แล้วแนบภาพอ้างอิงของคุณ (ถ้ามี) ในข้อความเดียวกัน**
+${hasFiles ? `มีภาพอ้างอิงแนบมาด้วย ${state.files.length} รูป ให้ใช้เป็น Ingredients ของแต่ละคลิปตามลำดับ` : 'ไม่มีภาพอ้างอิงแนบมา ให้ Flow สร้างฉากขึ้นเองตาม Prompt ข้อความล้วน (text-to-video)'}
+${state.idea.trim() ? `ไอเดียเพิ่มเติมจากผู้ใช้: "${state.idea.trim()}"` : ''}
+`;
 
-## บริบทของงาน
-- ประเภทงาน: ${catLabel()} (โหมด ${modeLabel})
-- ลำดับการนำเสนอ: ${sequenceLabel}
-- จำนวนภาพทั้งหมด: ${state.shots} ช็อต
-- โทนภาพหลัก: ${state.tone}
-- ${refNote}
-- ${ideaNote}
+    const clipBlocks = stages.map((stage, i) => {
+      const refNote = hasFiles
+        ? `ภาพอ้างอิงที่ใช้: รูปที่ ${Math.min(i + 1, state.files.length)} ที่อัปโหลดไว้ (หรือรูปที่ใกล้เคียงสถานะ "${stage.label}" ที่สุด)`
+        : `ภาพอ้างอิง: ไม่มี — ให้ Flow สร้างฉากจาก Prompt ข้อความล้วนด้านล่าง`;
 
-## สิ่งที่ต้องการให้ AI ทำ
-1. วิเคราะห์สภาพเริ่มต้น/โจทย์ของงานจากภาพหรือคำอธิบายข้างต้น
-2. ออกแบบลำดับภาพทั้งหมด ${state.shots} ช็อต ตามลำดับ: ${sequenceLabel}
-3. ควบคุมโทนภาพให้เป็น "${state.tone}" ตลอดทุกช็อตเพื่อความสม่ำเสมอ
-4. ${faceInstruction}
-5. อธิบายแต่ละช็อตให้ละเอียดพอที่จะนำไปใช้เป็น prompt สร้างภาพได้ทันที ประกอบด้วย มุมกล้อง, แสง, วัสดุ/พื้นผิว, องค์ประกอบเด่น และสิ่งที่เปลี่ยนไปจากช็อตก่อนหน้า
-6. เสียงประกอบ (ถ้าทำเป็นวิดีโอ/ไทม์แลปส์): ${state.audio}
+      const flowPrompt = `${camera.desc}. The scene shows a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. ${faceInstruction}. Cinematic, photorealistic, architectural quality, natural lighting matching the mood of the scene. Audio: ${state.audio}. Duration: approximately 8 seconds.`;
 
-## รูปแบบผลลัพธ์ที่ต้องการ
-ตอบกลับเป็นลิสต์ Shot 1 ถึง Shot ${state.shots} โดยแต่ละช็อตมีหัวข้อดังนี้:
-- **Shot [เลขที่]**
-  - คำอธิบายภาพ: ...
-  - มุมกล้อง/องค์ประกอบ: ...
-  - สิ่งที่เปลี่ยนจากช็อตก่อนหน้า: ...
-  - Prompt สำหรับสร้างภาพ (ภาษาอังกฤษ): ...
+      return `## คลิปที่ ${i + 1} — ${stage.label} (${stage.progress})
+${refNote}
 
-หลังจากลิสต์ครบทุกช็อต ให้สรุปแนวทางโทนสี/สไตล์โดยรวมของงานชุดนี้ปิดท้ายสั้นๆ 1 ย่อหน้า`;
+**Prompt (วางในช่อง Flow):**
+${flowPrompt}`;
+    }).join('\n\n');
+
+    return `${header}
+${clipBlocks}
+
+## หลังจากได้ครบทุกคลิป
+นำคลิปทั้งหมดไปเรียงต่อกันใน Flow Scenebuilder ตามลำดับ ${stages.map(s => s.label).join(' → ')} เพื่อให้ได้วิดีโอ ${modeLabel} ฉบับสมบูรณ์`;
   }
 
   document.getElementById('generateBtn').addEventListener('click', () => {

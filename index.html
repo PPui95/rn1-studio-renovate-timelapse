@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RN1 Studio — GPT Renovate + Timelapse Master Prompt Builder</title>
+<title>RN1 Studio — Google Flow Prompt Builder (Renovate + Timelapse)</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -23,20 +23,19 @@
     <nav class="topnav">
       <a href="#renovate" class="nav-btn" data-mode="renovate">🎨 Renovate</a>
       <a href="#timelapse" class="nav-btn" data-mode="timelapse">🎬 Timelapse</a>
-      <a href="#builder" class="nav-btn active">📄 Master Prompt</a>
+      <a href="#builder" class="nav-btn active">📄 Flow Prompt</a>
     </nav>
     <div class="topnav-right">
-      <a href="https://chatgpt.com/" target="_blank" rel="noopener" class="pill-btn">ChatGPT</a>
-      <a href="https://gemini.google.com/" target="_blank" rel="noopener" class="pill-btn pill-btn-alt">✨ Gemini</a>
+      <a href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener" class="pill-btn pill-btn-alt">🎬 Google Flow</a>
     </div>
   </div>
 </header>
 
 <section class="hero">
   <div class="hero-inner">
-    <h1>GPT <span class="accent">Renovate</span> + <span class="accent">Timelapse</span></h1>
-    <p class="hero-sub">สร้าง Master Prompt สำหรับ ChatGPT หรือ Gemini ได้ในเว็บเดียว</p>
-    <p class="hero-sub2">Renovate • ก่อสร้าง • TimeLapse ครบในระบบเดียว</p>
+    <h1>Flow <span class="accent">Renovate</span> + <span class="accent">Timelapse</span></h1>
+    <p class="hero-sub">สร้าง Prompt วิดีโอสำหรับ Google Flow (Veo) จากภาพอ้างอิงไม่กี่รูป</p>
+    <p class="hero-sub2">อัปโหลดรูปก่อน/หลัง แล้วให้ Flow เนรมิตเป็นคลิปวิดีโอ Renovate หรือ Timelapse ก่อสร้าง</p>
   </div>
 </section>
 
@@ -45,7 +44,7 @@
   <div class="steps-bar">
     <div class="step" data-step="1"><span class="step-num">1</span> เลือกหมวดงาน</div>
     <div class="step" data-step="2"><span class="step-num">2</span> ปรับสไตล์ + ตั้งค่า</div>
-    <div class="step" data-step="3"><span class="step-num">3</span> ได้ Master Prompt พร้อมใช้</div>
+    <div class="step" data-step="3"><span class="step-num">3</span> ได้ Prompt พร้อมใช้กับ Flow</div>
   </div>
 
   <div class="builder-grid">
@@ -64,10 +63,10 @@
       <label class="field-label" for="ideaText">✍️ เขียนไอเดียของคุณเอง (ถ้ามี)</label>
       <textarea id="ideaText" rows="3" placeholder="เช่น อยากได้บ้านสไตล์ Modern Tropical มีสระว่ายน้ำเล็กหลังบ้าน..."></textarea>
 
-      <label class="field-label" for="refUpload">📷 อัปโหลดรูปที่ชอบ (ไม่บังคับ)</label>
+      <label class="field-label" for="refUpload">📷 อัปโหลดภาพอ้างอิง (ใช้เป็น Ingredients ใน Flow)</label>
       <div class="upload-box" id="uploadBox">
         <input type="file" id="refUpload" accept="image/*" multiple hidden>
-        <span id="uploadHint">ลากรูปมาวาง หรือคลิกเพื่อเลือกไฟล์ — ถ้าไม่มีรูป ระบบคิดไอเดียให้เอง</span>
+        <span id="uploadHint">Flow ต้องการแค่ไม่กี่รูป (1-4 รูป) — ลากรูปมาวาง หรือคลิกเพื่อเลือกไฟล์ ถ้าไม่มีรูป ระบบคิดคำอธิบายฉากให้แทน</span>
         <div class="upload-preview" id="uploadPreview"></div>
       </div>
     </section>
@@ -76,13 +75,22 @@
     <section class="panel">
       <h2 class="panel-title">⚙️ ตั้งค่าการสร้าง</h2>
 
-      <label class="field-label">จำนวนช็อต</label>
-      <div class="chip-row" id="shotsRow">
-        <button type="button" class="chip" data-shots="6">6</button>
-        <button type="button" class="chip active" data-shots="8">8</button>
-        <button type="button" class="chip" data-shots="10">10</button>
-        <button type="button" class="chip" data-shots="12">12</button>
-        <button type="button" class="chip" data-shots="15">15</button>
+      <label class="field-label">จำนวนคลิป <span class="field-hint">(แต่ละคลิป ~8 วินาที ต่อภาพอ้างอิง 1 รูป)</span></label>
+      <div class="chip-row" id="clipsRow">
+        <button type="button" class="chip" data-clips="1">1 · ก่อน→หลัง</button>
+        <button type="button" class="chip active" data-clips="2">2 · ก่อน-หลัง</button>
+        <button type="button" class="chip" data-clips="3">3 · ก่อน-กลาง-หลัง</button>
+        <button type="button" class="chip" data-clips="4">4 · ละเอียดขึ้น</button>
+      </div>
+
+      <label class="field-label">การเคลื่อนไหวกล้อง</label>
+      <div class="chip-row" id="cameraRow">
+        <button type="button" class="chip active" data-camera="static">🔒 นิ่ง (Static)</button>
+        <button type="button" class="chip" data-camera="dolly">🎯 เลื่อนเข้า (Dolly In)</button>
+        <button type="button" class="chip" data-camera="pan">↔️ แพนกล้อง (Pan)</button>
+        <button type="button" class="chip" data-camera="orbit">🔄 หมุนรอบ (Orbit)</button>
+        <button type="button" class="chip" data-camera="crane">🪜 เครนสำรวจ (Crane Reveal)</button>
+        <button type="button" class="chip" data-camera="walk">🚶 เดินสำรวจ (Walkthrough)</button>
       </div>
 
       <label class="field-label" for="toneSelect">โทนภาพ</label>
@@ -108,36 +116,35 @@
         <button type="button" class="chip" data-face="เห็นหน้าคน">🙂 เห็นหน้าคน</button>
       </div>
 
-      <label class="field-label">เสียงประกอบ (สำหรับวิดีโอ/ไทม์แลปส์)</label>
+      <label class="field-label">เสียงในคลิป <span class="field-hint">(Veo สร้างเสียงในตัวได้)</span></label>
       <div class="chip-row" id="audioRow">
-        <button type="button" class="chip active" data-audio="ให้ AI เลือกเสียงที่เหมาะสมเอง">🎚️ ให้ AI เลือก</button>
-        <button type="button" class="chip" data-audio="เสียงพากย์บรรยายขั้นตอนงาน">🎙️ เสียงพากย์งาน</button>
-        <button type="button" class="chip" data-audio="เสียงบรรยากาศหน้างาน/โรงงานจริง">🏗️ เสียงหน้างาน</button>
+        <button type="button" class="chip active" data-audio="ให้ AI เลือกเสียงที่เหมาะสมกับฉากเอง">🎚️ ให้ AI เลือก</button>
+        <button type="button" class="chip" data-audio="มีเสียงบรรยาย/บทพูดสั้นๆ บรรยายขั้นตอนงาน">🎙️ มีเสียงบรรยาย</button>
+        <button type="button" class="chip" data-audio="เสียงบรรยากาศหน้างานจริง เช่น เสียงเครื่องมือช่าง เสียงลม ไม่มีบทพูด">🏗️ เสียงหน้างานจริง</button>
       </div>
 
-      <button type="button" id="generateBtn" class="generate-btn">✨ สร้าง Master Prompt →</button>
+      <button type="button" id="generateBtn" class="generate-btn">✨ สร้าง Prompt สำหรับ Flow →</button>
     </section>
   </div>
 
   <!-- OUTPUT -->
   <section class="panel output-panel" id="outputPanel" style="display:none;">
     <div class="output-head">
-      <h2 class="panel-title">📄 คำสั่งสำหรับ AI ของคุณ</h2>
+      <h2 class="panel-title">📄 Prompt สำหรับ Google Flow</h2>
       <button type="button" id="copyBtn" class="copy-btn">📋 คัดลอก</button>
     </div>
     <textarea id="outputText" class="output-text" readonly></textarea>
     <div class="output-actions">
-      <a id="openChatGPT" href="https://chatgpt.com/" target="_blank" rel="noopener" class="action-btn gpt-btn">💬 ใช้กับ ChatGPT</a>
-      <a id="openGemini" href="https://gemini.google.com/" target="_blank" rel="noopener" class="action-btn gemini-btn">✨ ใช้กับ Gemini</a>
+      <a id="openFlow" href="https://labs.google/fx/tools/flow" target="_blank" rel="noopener" class="action-btn flow-btn">🎬 เปิด Google Flow</a>
     </div>
-    <p class="output-note">คัดลอกข้อความนี้ไปวางในแชท แล้วแนบรูปอ้างอิงของคุณ (ถ้ามี) เพื่อให้ AI เริ่มสร้างภาพ/ไอเดียให้ทันที</p>
+    <p class="output-note">ใน Flow: เลือก "Ingredients to Video" แล้วอัปโหลดภาพอ้างอิงของคลิปนั้น จากนั้นวาง prompt ของคลิปนั้นลงในช่องคำสั่ง แล้วกด Generate ทำซ้ำทีละคลิปตามลำดับ แล้วต่อคลิปทั้งหมดใน Scenebuilder ของ Flow</p>
   </section>
 
   <section class="feature-row">
-    <div class="feature-item">🖼️ <span>มีภาพตัวอย่าง<br>เริ่ม &gt; กลาง &gt; เสร็จ</span></div>
-    <div class="feature-item">✏️ <span>เขียนไอเดียตัวเอง<br>เพิ่มได้</span></div>
-    <div class="feature-item">📤 <span>อัปโหลดรูปที่ชอบได้<br>ใช้เป็นต้นแบบ</span></div>
-    <div class="feature-item">💡 <span>ต่อยอดงานได้ไม่ซ้ำใคร<br>ไอเดียใหม่ที่เป็นของคุณ</span></div>
+    <div class="feature-item">🖼️ <span>ใช้ภาพอ้างอิงแค่ไม่กี่รูป<br>เริ่ม &gt; กลาง &gt; เสร็จ</span></div>
+    <div class="feature-item">🎥 <span>Prompt พร้อมใช้กับ<br>Google Flow (Veo)</span></div>
+    <div class="feature-item">📤 <span>อัปโหลดรูปเป็น<br>Ingredients to Video</span></div>
+    <div class="feature-item">🔊 <span>ได้เสียงในคลิปด้วย<br>Veo Native Audio</span></div>
   </section>
 
   <section class="example-section">
