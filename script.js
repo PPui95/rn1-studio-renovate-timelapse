@@ -215,29 +215,40 @@
     lines.push(`# WORKFLOW: RN1 Flow ${modeLabel} — ${catLabel()}`);
     lines.push(`หมวดงาน: ${catLabel()} | จำนวนคลิป: ${stages.length} | กล้อง: ${camera.label} | โทนภาพ: ${state.tone}`);
     lines.push('');
+    lines.push(`Pipeline ทั้งหมด: [Image Prompt] → ได้ภาพนิ่ง → [Video Prompt ผ่าน "Ingredients to Video"] → ได้คลิปวิดีโอ ~8 วิ → รวมทุกคลิปใน Scenebuilder → วิดีโอฉบับสมบูรณ์`);
+    lines.push('');
 
     lines.push(`## ขั้นตอนที่ ${step()} — เตรียมตัวก่อนเริ่ม`);
     lines.push(`${stepNum}.1 เปิด Google Flow ที่ https://labs.google/fx/tools/flow`);
-    lines.push(`${stepNum}.2 ${hasFiles ? `เตรียมภาพอ้างอิงที่อัปโหลดไว้ ${state.files.length} รูป ให้พร้อมสำหรับแต่ละคลิป` : 'ไม่มีภาพอ้างอิง — ข้ามขั้นนี้ได้ Flow จะสร้างฉากจาก prompt ข้อความล้วน (text-to-video)'}`);
+    lines.push(`${stepNum}.2 ${hasFiles ? `มีภาพอ้างอิงที่อัปโหลดไว้แล้ว ${state.files.length} รูป — ใช้รูปเหล่านั้นแทนการสร้างภาพใหม่ได้เลย (ข้ามขั้นตอน "สร้างภาพ" ของคลิปที่มีรูปตรงกัน)` : 'ยังไม่มีภาพอ้างอิง — แต่ละคลิปด้านล่างจะมีขั้นตอน "สร้างภาพ" ให้ทำก่อน แล้วค่อยนำภาพนั้นไปสร้างวิดีโอ'}`);
     lines.push(`${stepNum}.3 ตั้งค่าโปรเจกต์ในใจ: โหมด = ${modeLabel}, หมวดงาน = ${catLabel()}, โทนภาพ = ${state.tone}, กล้อง = ${camera.label}`);
     if (state.idea.trim()) lines.push(`${stepNum}.4 ไอเดียเพิ่มเติมที่ต้องใส่ในทุกคลิป: "${state.idea.trim()}"`);
     lines.push('');
 
     stages.forEach((stage, i) => {
       const n = step();
-      const refLine = hasFiles
-        ? `${n}.2 อัปโหลดภาพอ้างอิง: รูปที่ ${Math.min(i + 1, state.files.length)} ที่เตรียมไว้ (หรือรูปที่ตรงกับสถานะ "${stage.label}" ที่สุด) ลงในโหมด "Ingredients to Video"`
-        : `${n}.2 ข้ามการอัปโหลดภาพ — ปล่อยให้ Flow สร้างฉากจาก prompt ข้อความล้วนด้านล่าง`;
+      const hasMatchingFile = hasFiles && i < state.files.length;
 
-      const flowPrompt = `${camera.desc}. The scene shows a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. ${faceInstruction}. Cinematic, photorealistic, architectural quality, natural lighting matching the mood of the scene. Audio: ${state.audio}. Duration: approximately 8 seconds.`;
+      const imagePrompt = `A high-resolution, photorealistic architectural photo of a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. Eye-level, straight-on composition, natural daylight, sharp focus, realistic materials and textures. ${faceInstruction.replace('in the shot', 'in the photo').replace('in at least some clips', 'in the photo')}. Professional real-estate photography, high detail, 4K quality, no text, no watermark.`;
 
-      lines.push(`## ขั้นตอนที่ ${n} — สร้างคลิปที่ ${i + 1}: ${stage.label} (${stage.progress})`);
-      lines.push(`${n}.1 ใน Flow เลือกโหมด "Ingredients to Video"`);
-      lines.push(refLine);
-      lines.push(`${n}.3 วาง Prompt นี้ลงในช่องคำสั่ง:`);
-      lines.push(`   "${flowPrompt}"`);
-      lines.push(`${n}.4 กด Generate แล้วรอผลลัพธ์ (คลิปยาวประมาณ 8 วินาที)`);
-      lines.push(`${n}.5 ถ้าผลลัพธ์ยังไม่ตรง ปรับถ้อยคำใน prompt แล้ว Generate ซ้ำ ก่อนไปคลิปถัดไป`);
+      const videoPrompt = `Animate this image with ${camera.desc}. The scene remains a ${catLabel()} — ${stage.desc}, styled with ${state.tone}. ${faceInstruction}. Cinematic, photorealistic, architectural quality, natural lighting matching the mood of the scene. Audio: ${state.audio}. Duration: approximately 8 seconds.`;
+
+      lines.push(`## ขั้นตอนที่ ${n} — คลิปที่ ${i + 1}: ${stage.label} (${stage.progress})`);
+
+      if (hasMatchingFile) {
+        lines.push(`${n}.1 ใช้ภาพที่อัปโหลดไว้รูปที่ ${i + 1} เป็นภาพตั้งต้นของคลิปนี้ได้เลย (ข้าม ${n}.2-${n}.3)`);
+      } else {
+        lines.push(`${n}.1 สร้างภาพนิ่งก่อน — ใน Flow เลือกโหมด "Image" (หรือใช้ Gemini/ImageFX ก็ได้) แล้ววาง Image Prompt นี้ลงในช่องคำสั่ง:`);
+        lines.push(`   "${imagePrompt}"`);
+        lines.push(`${n}.2 กด Generate จะได้ภาพนิ่งหลายแบบ เลือกภาพที่ตรงใจที่สุด 1 ภาพ`);
+        lines.push(`${n}.3 ถ้าภาพยังไม่ตรง ปรับถ้อยคำใน Image Prompt แล้ว Generate ใหม่จนกว่าจะได้ภาพที่ต้องการ`);
+      }
+
+      lines.push(`${n}.4 นำภาพที่ได้ (จากขั้นตอน ${n}.1${hasMatchingFile ? '' : '-' + n + '.3'}) ไปที่โหมด "Ingredients to Video" ในหน้า Flow`);
+      lines.push(`${n}.5 วาง Video Prompt นี้ลงในช่องคำสั่ง:`);
+      lines.push(`   "${videoPrompt}"`);
+      lines.push(`${n}.6 กด Generate แล้วรอผลลัพธ์ (คลิปวิดีโอยาวประมาณ 8 วินาที)`);
+      lines.push(`${n}.7 ถ้าผลลัพธ์ยังไม่ตรง ปรับถ้อยคำใน Video Prompt แล้ว Generate ซ้ำ ก่อนไปคลิปถัดไป`);
       lines.push('');
     });
 
